@@ -5,28 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Page</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .selected-row {
+            background-color: #f0f8ff !important;
+        }
+    </style>
 </head>
 <body class="container mt-5">
-<h1 class="text-center">Event Page</h1>
-<p id="response" class="text-center"></p>
-<button id="eventBtn" class="btn btn-primary mb-3">SEND Event Request</button>
+<h1 class="text-center mb-4">Event Management</h1>
 
-<table id="event-table" class="table table-striped table-bordered">
-    <thead class="table-dark">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Place</th>
-        <th>Description</th>
-        <th>Date</th>
-    </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Event Details</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="eid" class="form-label">Event ID</label>
+                <input type="text" id="eid" class="form-control" placeholder="Enter Event ID">
+            </div>
+            <div class="col-md-6">
+                <label for="ename" class="form-label">Event Name</label>
+                <input type="text" id="ename" class="form-control" placeholder="Enter Event Name">
+            </div>
+            <div class="col-md-6">
+                <label for="edescription" class="form-label">Event Description</label>
+                <input type="text" id="edescription" class="form-control" placeholder="Enter Event Description">
+            </div>
+            <div class="col-md-6">
+                <label for="edate" class="form-label">Event Date</label>
+                <input type="date" id="edate" class="form-control">
+            </div>
+            <div class="col-md-6">
+                <label for="eplace" class="form-label">Event Place</label>
+                <input type="text" id="eplace" class="form-control" placeholder="Enter Event Place">
+            </div>
+        </div>
+        <div class="mt-4">
+            <button id="addEventBtn" class="btn btn-success me-2">
+                <i class="bi bi-plus-circle"></i> Add Event
+            </button>
+            <button id="updateEventBtn" class="btn btn-primary" style="display: none;">
+                <i class="bi bi-pencil-square"></i> Update Event
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Event List</h5>
+    </div>
+    <div class="card-body">
+        <table id="event-table" class="table table-striped table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Place</th>
+                <th>Description</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
 <script src="script.js"></script>
-<!--<script src="app.js"></script>-->
 </body>
 </html>
