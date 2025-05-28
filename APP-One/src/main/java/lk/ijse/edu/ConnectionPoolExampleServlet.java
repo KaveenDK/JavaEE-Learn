@@ -1,11 +1,13 @@
 package lk.ijse.edu;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysql.cj.jdbc.DatabaseMetaData;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import java.io.IOException;
 import java.sql.*;
@@ -19,28 +21,33 @@ import java.util.Map;
  * @Author Dimantha Kaveen
  * @GitHub: https://github.com/KaveenDK
  * --------------------------------------------
- * @Created 5/19/2025
+ * @Created 5/26/2025
  * @Project JavaEE-learn
  * --------------------------------------------
  **/
 
-@WebServlet("/event")
-public class EventServlet extends HttpServlet {
+@WebServlet("/connectionpool")
+public class ConnectionPoolExampleServlet extends HttpServlet {
+
+    private BasicDataSource ds;
 
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setHeader("Access-Control-Allow-Origin", "http://localhost:63342");
-        resp.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        resp.setHeader("Access-Control-Allow-Headers", "Content-Type");
-        resp.setHeader("Access-Control-Allow-Credentials", "true");
-        resp.setStatus(HttpServletResponse.SC_OK);
+    public void init() throws ServletException {
+        // 50
+        ds = new BasicDataSource();
+        ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        ds.setUrl("jdbc:mysql://localhost:3306/appone");
+        ds.setUsername("root");
+        ds.setPassword("Ijse@1234");
+        ds.setInitialSize(5); // Initial number of connections
+        ds.setMaxTotal(50); // Maximum number of connections in the pool
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/appone", "root", "Ijse@1234");
+            Connection connection = ds.getConnection();
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM events");
             ResultSet resultSet = statement.executeQuery();
             List<Map<String, String>> elist = new ArrayList<>();
@@ -56,7 +63,7 @@ public class EventServlet extends HttpServlet {
             resp.setContentType("application/json");
             ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(resp.getWriter(), elist);
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -64,8 +71,7 @@ public class EventServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/appone", "root", "Ijse@1234");
+            Connection connection = ds.getConnection();
             Map<String, String> event = new ObjectMapper().readValue(req.getReader(), Map.class);
             PreparedStatement statement = connection.prepareStatement("INSERT INTO events (eid, ename, edescription, edate, eplace) VALUES (?, ?, ?, ?, ?)");
             statement.setString(1, event.get("eid"));
@@ -75,7 +81,7 @@ public class EventServlet extends HttpServlet {
             statement.setString(5, event.get("eplace"));
             statement.executeUpdate();
             resp.setStatus(HttpServletResponse.SC_CREATED);
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -83,8 +89,7 @@ public class EventServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/appone", "root", "Ijse@1234");
+            Connection connection = ds.getConnection();
             Map<String, String> event = new ObjectMapper().readValue(req.getReader(), Map.class);
             PreparedStatement statement = connection.prepareStatement("UPDATE events SET ename = ?, edescription = ?, edate = ?, eplace = ? WHERE eid = ?");
             statement.setString(1, event.get("ename"));
@@ -94,7 +99,7 @@ public class EventServlet extends HttpServlet {
             statement.setString(5, event.get("eid"));
             statement.executeUpdate();
             resp.setStatus(HttpServletResponse.SC_OK);
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -102,14 +107,13 @@ public class EventServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/appone", "root", "Ijse@1234");
+            Connection connection = ds.getConnection();
             String eid = req.getParameter("eid");
             PreparedStatement statement = connection.prepareStatement("DELETE FROM events WHERE eid = ?");
             statement.setString(1, eid);
             statement.executeUpdate();
             resp.setStatus(HttpServletResponse.SC_OK);
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
