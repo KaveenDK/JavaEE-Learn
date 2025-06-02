@@ -2,6 +2,7 @@ package lk.ijse.edu;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mysql.cj.jdbc.DatabaseMetaData;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -29,24 +30,26 @@ import java.util.Map;
 @WebServlet("/connectionpool")
 public class ConnectionPoolExampleServlet extends HttpServlet {
 
-    private BasicDataSource ds;
 
-    @Override
-    public void init() throws ServletException {
-        // 50
-        ds = new BasicDataSource();
-        ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
-        ds.setUrl("jdbc:mysql://localhost:3306/appone");
-        ds.setUsername("root");
-        ds.setPassword("Ijse@1234");
-        ds.setInitialSize(5); // Initial number of connections
-        ds.setMaxTotal(50); // Maximum number of connections in the pool
-    }
+//    @Override
+//    public void init() throws ServletException {
+//        // 50
+//        ds = new BasicDataSource();
+//        ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
+//        ds.setUrl("jdbc:mysql://localhost:3306/appone");
+//        ds.setUsername("root");
+//        ds.setPassword("Ijse@1234");
+//        ds.setInitialSize(5); // Initial number of connections
+//        ds.setMaxTotal(50); // Maximum number of connections in the pool
+//    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         try {
+            ServletContext servletContext = getServletContext();
+            BasicDataSource ds = (BasicDataSource) servletContext.getAttribute("dataSource");
+
             Connection connection = ds.getConnection();
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM events");
             ResultSet resultSet = statement.executeQuery();
@@ -71,6 +74,9 @@ public class ConnectionPoolExampleServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
+            ServletContext servletContext = getServletContext();
+            BasicDataSource ds = (BasicDataSource) servletContext.getAttribute("dataSource");
+
             Connection connection = ds.getConnection();
             Map<String, String> event = new ObjectMapper().readValue(req.getReader(), Map.class);
             PreparedStatement statement = connection.prepareStatement("INSERT INTO events (eid, ename, edescription, edate, eplace) VALUES (?, ?, ?, ?, ?)");
@@ -89,6 +95,9 @@ public class ConnectionPoolExampleServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
+            ServletContext servletContext = getServletContext();
+            BasicDataSource ds = (BasicDataSource) servletContext.getAttribute("dataSource");
+
             Connection connection = ds.getConnection();
             Map<String, String> event = new ObjectMapper().readValue(req.getReader(), Map.class);
             PreparedStatement statement = connection.prepareStatement("UPDATE events SET ename = ?, edescription = ?, edate = ?, eplace = ? WHERE eid = ?");
@@ -107,6 +116,9 @@ public class ConnectionPoolExampleServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
+            ServletContext servletContext = getServletContext();
+            BasicDataSource ds = (BasicDataSource) servletContext.getAttribute("dataSource");
+
             Connection connection = ds.getConnection();
             String eid = req.getParameter("eid");
             PreparedStatement statement = connection.prepareStatement("DELETE FROM events WHERE eid = ?");
